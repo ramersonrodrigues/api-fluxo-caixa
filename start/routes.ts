@@ -20,6 +20,7 @@ const ResetPasswordController = () => import('#controllers/auth/reset_password_c
 const UpdateProfileController = () => import('#controllers/auth/update_profile_controller')
 const ChangePasswordController = () => import('#controllers/auth/change_password_controller')
 const DeleteAccountController = () => import('#controllers/auth/delete_account_controller')
+const ImoveisController = () => import('#controllers/imoveis_controller')
 
 router.get('/', async () => {
   return {
@@ -45,3 +46,8 @@ router
       .use(middleware.auth())
   })
   .prefix('/auth')
+
+router
+  .resource('imoveis', ImoveisController)
+  .only(['index', 'store', 'update', 'destroy'])
+  .use('*', middleware.auth())
