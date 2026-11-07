@@ -1,5 +1,6 @@
 import db from '@adonisjs/lucid/services/db'
 import type { AccessToken } from '@adonisjs/auth/access_tokens'
+import { errors as authErrors } from '@adonisjs/auth'
 
 import User from '#models/user'
 import UserRepository, { type CreateUserData } from '#repositories/contracts/user_repository'
@@ -14,16 +15,36 @@ export default class LucidUserRepository extends UserRepository {
   }
 
   findByEmail(email: string): Promise<User | null> {
-    return User.query().where('email', email).first()
+    return User.query().where('email', email).where('is_active', true).first()
   }
 
-  verifyCredentials(email: string, password: string): Promise<User> {
-    return User.verifyCredentials(email, password)
+  async verifyCredentials(email: string, password: string): Promise<User> {
+    const user = await User.verifyCredentials(email, password)
+    if (!user.isActive) {
+      throw new authErrors.E_INVALID_CREDENTIALS('Invalid user credentials')
+    }
+    return user
   }
 
   async updatePassword(user: User, plainPassword: string): Promise<User> {
     user.password = plainPassword
     return user.save()
+  }
+
+  async updateProfile(
+    user: User,
+    data: { fullName: string; avatar?: string | null }
+  ): Promise<User> {
+    user.fullName = data.fullName
+    if (data.avatar !== undefined) {
+      user.avatar = data.avatar
+    }
+    return user.save()
+  }
+
+  async deactivateUser(user: User): Promise<void> {
+    user.isActive = false
+    await user.save()
   }
 
   createAccessToken(user: User): Promise<AccessToken> {

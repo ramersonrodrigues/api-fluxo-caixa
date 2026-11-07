@@ -4,6 +4,7 @@ import { inject } from '@adonisjs/core'
 import { DateTime } from 'luxon'
 
 import InvalidResetTokenException from '#exceptions/invalid_reset_token_exception'
+import type User from '#models/user'
 import PasswordResetTokenRepository from '#repositories/contracts/password_reset_token_repository'
 import UserRepository, { type CreateUserData } from '#repositories/contracts/user_repository'
 import PasswordResetNotifier from '#services/password_reset_notifier'
@@ -62,6 +63,29 @@ export default class AuthService {
 
     await this.users.updatePassword(user, newPassword)
     await this.resetTokens.delete(record)
+    await this.users.revokeAllAccessTokens(user)
+  }
+
+  async updateProfile(user: User, data: { fullName: string; avatar?: string | null }) {
+    return this.users.updateProfile(user, data)
+  }
+
+  /**
+   * Verifies the current password before updating it, then revokes every
+   * session (including the current one) forcing a fresh login everywhere.
+   */
+  async changePassword(user: User, currentPassword: string, newPassword: string): Promise<void> {
+    await this.users.verifyCredentials(user.email, currentPassword)
+    await this.users.updatePassword(user, newPassword)
+    await this.users.revokeAllAccessTokens(user)
+  }
+
+  /**
+   * Soft delete: keeps the row for security/auditing and only deactivates
+   * the account, revoking every active session.
+   */
+  async deactivateAccount(user: User): Promise<void> {
+    await this.users.deactivateUser(user)
     await this.users.revokeAllAccessTokens(user)
   }
 

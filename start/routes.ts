@@ -17,6 +17,9 @@ const LogoutController = () => import('#controllers/auth/logout_controller')
 const MeController = () => import('#controllers/auth/me_controller')
 const ForgotPasswordController = () => import('#controllers/auth/forgot_password_controller')
 const ResetPasswordController = () => import('#controllers/auth/reset_password_controller')
+const UpdateProfileController = () => import('#controllers/auth/update_profile_controller')
+const ChangePasswordController = () => import('#controllers/auth/change_password_controller')
+const DeleteAccountController = () => import('#controllers/auth/delete_account_controller')
 
 router.get('/', async () => {
   return {
@@ -35,6 +38,9 @@ router
       .group(() => {
         router.get('/me', [MeController])
         router.post('/logout', [LogoutController])
+        router.put('/profile', [UpdateProfileController])
+        router.post('/change-password', [ChangePasswordController])
+        router.delete('/account', [DeleteAccountController])
       })
       .use(middleware.auth())
   })

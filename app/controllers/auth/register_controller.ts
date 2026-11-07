@@ -15,6 +15,7 @@ export default class RegisterController {
           ...request.body(),
           password: '[REDACTED]',
           password_confirmation: '[REDACTED]',
+          avatar: request.body().avatar ? '[IMAGE]' : undefined,
         },
       },
       'register request received'
