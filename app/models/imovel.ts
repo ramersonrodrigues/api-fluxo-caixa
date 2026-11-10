@@ -1,5 +1,8 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+
+import ImovelImagem from '#models/imovel_imagem'
 
 export const IMOVEL_TYPES = ['casa', 'apartamento', 'terreno'] as const
 export type ImovelType = (typeof IMOVEL_TYPES)[number]
@@ -27,6 +30,9 @@ export default class Imovel extends BaseModel {
 
   @column({ consume: (value: string | number) => Number(value) })
   declare value: number
+
+  @hasMany(() => ImovelImagem)
+  declare imagens: HasMany<typeof ImovelImagem>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

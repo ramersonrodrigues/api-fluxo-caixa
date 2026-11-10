@@ -6,6 +6,8 @@ export interface ImovelData {
   address?: string | null
   description?: string | null
   value: number
+  /** data URIs base64; na atualização, substitui o conjunto inteiro */
+  imagens?: string[]
 }
 
 export default abstract class ImovelRepository {
