@@ -1,6 +1,7 @@
 import type { DateTime } from 'luxon'
 
 import type Contrato from '#models/contrato'
+import type Lancamento from '#models/lancamento'
 import type { TipoParcelamento } from '#models/contrato'
 import type { LancamentoData, ParcelaData } from '#repositories/contracts/lancamento_repository'
 
@@ -36,4 +37,9 @@ export default abstract class ContratoRepository {
     parcelas: ParcelaData[]
   ): Promise<Contrato>
   abstract delete(contrato: Contrato): Promise<void>
+  /** Rescinde o contrato: cancela o lançamento vinculado e suas parcelas pendentes. */
+  abstract desativar(contrato: Contrato): Promise<Contrato>
+  /** Lançamento gerado pelo contrato, com parcelas (null se não existir). */
+  abstract findLancamentoVinculado(contratoId: number): Promise<Lancamento | null>
+  abstract existsForImovel(imovelId: number): Promise<boolean>
 }

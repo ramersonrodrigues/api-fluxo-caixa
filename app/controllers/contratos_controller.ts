@@ -38,4 +38,9 @@ export default class ContratosController {
     await this.contratoService.delete(auth.getUserOrFail(), params.id)
     return response.noContent()
   }
+
+  async desativar({ auth, params }: HttpContext) {
+    const contrato = await this.contratoService.desativar(auth.getUserOrFail(), params.id)
+    return { contrato }
+  }
 }

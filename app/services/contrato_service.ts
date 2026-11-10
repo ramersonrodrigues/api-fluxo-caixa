@@ -1,6 +1,7 @@
 import { inject } from '@adonisjs/core'
 import type { DateTime } from 'luxon'
 
+import OperacaoBloqueadaException from '#exceptions/operacao_bloqueada_exception'
 import type { TipoParcelamento } from '#models/contrato'
 import type User from '#models/user'
 import ContratoRepository, { type ContratoData } from '#repositories/contracts/contrato_repository'
@@ -88,13 +89,43 @@ export default class ContratoService {
       this.contratos.findForUser(user.id, id),
       this.imoveis.findForUser(user.id, input.imovelId),
     ])
+    await this.assertSemBaixas(contrato, 'editar')
     const { data, lancamento, parcelas } = this.montar(input, imovel.name)
     return this.contratos.update(contrato, data, lancamento, parcelas)
   }
 
   async delete(user: User, id: number): Promise<void> {
     const contrato = await this.contratos.findForUser(user.id, id)
+    await this.assertSemBaixas(contrato, 'excluir')
     await this.contratos.delete(contrato)
+  }
+
+  /**
+   * Rescinde o contrato: cancela o lançamento vinculado e suas parcelas
+   * pendentes. As já recebidas (e o caixa) permanecem intactas.
+   */
+  async desativar(user: User, id: number) {
+    const contrato = await this.contratos.findForUser(user.id, id)
+    if (contrato.status === 'rescindido') {
+      throw new OperacaoBloqueadaException('Este contrato já está rescindido.')
+    }
+    return this.contratos.desativar(contrato)
+  }
+
+  /** Bloqueia editar/excluir quando há baixas no lançamento vinculado. */
+  private async assertSemBaixas(
+    contrato: { id: number; status: string },
+    acao: string
+  ): Promise<void> {
+    if (contrato.status === 'rescindido' && acao === 'editar') {
+      throw new OperacaoBloqueadaException('Este contrato está rescindido e não pode ser editado.')
+    }
+    const lancamento = await this.contratos.findLancamentoVinculado(contrato.id)
+    if (lancamento?.parcelas.some((p) => p.status === 'paga')) {
+      throw new OperacaoBloqueadaException(
+        `Este contrato possui parcelas recebidas. Rescinda-o em vez de ${acao}.`
+      )
+    }
   }
 
   /**

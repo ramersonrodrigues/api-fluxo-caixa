@@ -4,7 +4,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 import Lancamento from '#models/lancamento'
 
-export const PARCELA_STATUS = ['pendente', 'paga'] as const
+export const PARCELA_STATUS = ['pendente', 'paga', 'cancelada'] as const
 export type ParcelaStatus = (typeof PARCELA_STATUS)[number]
 
 export default class LancamentoParcela extends BaseModel {

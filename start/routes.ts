@@ -75,6 +75,8 @@ router
       LancamentosController,
       'estornarParcela',
     ])
+    router.post('/lancamentos/:id/desativar', [LancamentosController, 'desativar'])
+    router.post('/contratos/:id/desativar', [ContratosController, 'desativar'])
     router.get('/caixa', [CaixaController, 'index'])
     router.post('/caixa/movimentos', [CaixaController, 'store'])
   })

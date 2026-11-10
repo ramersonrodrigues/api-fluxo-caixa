@@ -57,6 +57,20 @@ export default class LucidLancamentoRepository extends LancamentoRepository {
     await lancamento.delete()
   }
 
+  desativar(lancamento: Lancamento): Promise<Lancamento> {
+    return db.transaction(async (trx) => {
+      lancamento.useTransaction(trx)
+      await lancamento.merge({ status: 'cancelado' }).save()
+      await lancamento
+        .related('parcelas')
+        .query()
+        .where('status', 'pendente')
+        .update({ status: 'cancelada' })
+      await lancamento.load('parcelas', (query) => query.orderBy('numero', 'asc'))
+      return lancamento
+    })
+  }
+
   findParcela(lancamento: Lancamento, parcelaId: number): Promise<LancamentoParcela> {
     return lancamento.related('parcelas').query().where('id', parcelaId).firstOrFail()
   }

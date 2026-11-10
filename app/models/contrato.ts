@@ -8,6 +8,9 @@ import Lancamento from '#models/lancamento'
 export const TIPOS_PARCELAMENTO = ['maior', 'extra'] as const
 export type TipoParcelamento = (typeof TIPOS_PARCELAMENTO)[number]
 
+export const CONTRATO_STATUS = ['ativo', 'rescindido'] as const
+export type ContratoStatus = (typeof CONTRATO_STATUS)[number]
+
 export default class Contrato extends BaseModel {
   static table = 'contratos'
 
@@ -49,6 +52,9 @@ export default class Contrato extends BaseModel {
 
   @column()
   declare qtdParcelas: number
+
+  @column()
+  declare status: ContratoStatus
 
   @belongsTo(() => Imovel)
   declare imovel: BelongsTo<typeof Imovel>

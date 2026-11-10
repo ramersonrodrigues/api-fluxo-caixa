@@ -43,6 +43,8 @@ export default abstract class LancamentoRepository {
     parcelas: ParcelaData[]
   ): Promise<Lancamento>
   abstract delete(lancamento: Lancamento): Promise<void>
+  /** Cancela o lançamento e suas parcelas pendentes (as pagas permanecem). */
+  abstract desativar(lancamento: Lancamento): Promise<Lancamento>
   abstract findParcela(lancamento: Lancamento, parcelaId: number): Promise<LancamentoParcela>
   abstract executarParcela(
     parcela: LancamentoParcela,

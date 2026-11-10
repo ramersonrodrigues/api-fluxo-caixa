@@ -46,6 +46,11 @@ export default class LancamentosController {
     return response.noContent()
   }
 
+  async desativar({ auth, params }: HttpContext) {
+    const lancamento = await this.lancamentoService.desativar(auth.getUserOrFail(), params.id)
+    return { lancamento }
+  }
+
   async executarParcela({ auth, params }: HttpContext) {
     const parcela = await this.lancamentoService.executarParcela(
       auth.getUserOrFail(),
