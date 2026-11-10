@@ -21,6 +21,9 @@ const UpdateProfileController = () => import('#controllers/auth/update_profile_c
 const ChangePasswordController = () => import('#controllers/auth/change_password_controller')
 const DeleteAccountController = () => import('#controllers/auth/delete_account_controller')
 const ImoveisController = () => import('#controllers/imoveis_controller')
+const LancamentosController = () => import('#controllers/lancamentos_controller')
+const CaixaController = () => import('#controllers/caixa_controller')
+const ContratosController = () => import('#controllers/contratos_controller')
 
 router.get('/', async () => {
   return {
@@ -51,3 +54,28 @@ router
   .resource('imoveis', ImoveisController)
   .only(['index', 'store', 'update', 'destroy'])
   .use('*', middleware.auth())
+
+router
+  .resource('lancamentos', LancamentosController)
+  .only(['index', 'store', 'update', 'destroy'])
+  .use('*', middleware.auth())
+
+router
+  .resource('contratos', ContratosController)
+  .only(['index', 'store', 'update', 'destroy'])
+  .use('*', middleware.auth())
+
+router
+  .group(() => {
+    router.post('/lancamentos/:id/parcelas/:parcelaId/executar', [
+      LancamentosController,
+      'executarParcela',
+    ])
+    router.post('/lancamentos/:id/parcelas/:parcelaId/estornar', [
+      LancamentosController,
+      'estornarParcela',
+    ])
+    router.get('/caixa', [CaixaController, 'index'])
+    router.post('/caixa/movimentos', [CaixaController, 'store'])
+  })
+  .use(middleware.auth())
