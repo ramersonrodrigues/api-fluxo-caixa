@@ -4,10 +4,15 @@ import Imovel from '#models/imovel'
 import ImovelRepository, { type ImovelData } from '#repositories/contracts/imovel_repository'
 
 export default class LucidImovelRepository extends ImovelRepository {
+  /**
+   * A listagem traz só a capa (ordem 0) — pré-carregar todas as imagens
+   * base64 de todos os imóveis tornaria a resposta pesada demais. O
+   * conjunto completo vem do findForUser (detalhe/edição).
+   */
   listForUser(userId: number): Promise<Imovel[]> {
     return Imovel.query()
       .where('user_id', userId)
-      .preload('imagens', (query) => query.orderBy('ordem', 'asc'))
+      .preload('imagens', (query) => query.where('ordem', 0))
       .orderBy('created_at', 'desc')
   }
 

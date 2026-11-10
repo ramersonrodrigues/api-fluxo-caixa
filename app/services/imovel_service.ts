@@ -16,6 +16,10 @@ export default class ImovelService {
     return this.imoveis.listForUser(user.id)
   }
 
+  find(user: User, id: number) {
+    return this.imoveis.findForUser(user.id, id)
+  }
+
   create(user: User, data: ImovelData) {
     return this.imoveis.create(user.id, data)
   }

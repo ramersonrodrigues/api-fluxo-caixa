@@ -7,6 +7,6 @@ export const createCaixaMovimentoValidator = vine.compile(
     tipo: vine.enum(CAIXA_MOVIMENTO_TYPES),
     descricao: vine.string().trim().minLength(2).maxLength(255),
     valor: vine.number().positive(),
-    dataMovimento: vine.date().optional(),
+    dataMovimento: vine.date().beforeOrEqual('today').optional(),
   })
 )

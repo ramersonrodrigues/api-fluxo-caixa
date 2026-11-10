@@ -2,16 +2,39 @@ import db from '@adonisjs/lucid/services/db'
 import type { DateTime } from 'luxon'
 
 import CaixaMovimento from '#models/caixa_movimento'
-import CaixaRepository, { type CaixaMovimentoInput } from '#repositories/contracts/caixa_repository'
+import CaixaRepository, {
+  type CaixaMovimentoInput,
+  type PageResult,
+  type PaginationOptions,
+} from '#repositories/contracts/caixa_repository'
 import { registrarMovimento } from '#repositories/lucid/caixa_ledger'
 
 export default class LucidCaixaRepository extends CaixaRepository {
-  listForUser(userId: number, inicio?: DateTime, fim?: DateTime): Promise<CaixaMovimento[]> {
-    return CaixaMovimento.query()
+  async listForUser(
+    userId: number,
+    inicio?: DateTime,
+    fim?: DateTime,
+    paginacao?: PaginationOptions
+  ): Promise<PageResult<CaixaMovimento>> {
+    const base = CaixaMovimento.query()
       .where('user_id', userId)
       .if(inicio, (query) => query.where('data_movimento', '>=', inicio!.toISODate()!))
       .if(fim, (query) => query.where('data_movimento', '<=', fim!.toISODate()!))
       .orderBy('id', 'desc')
+
+    if (paginacao) {
+      const page = await base.paginate(paginacao.page, paginacao.limit)
+      return {
+        items: page.all(),
+        meta: {
+          total: page.total,
+          perPage: page.perPage,
+          currentPage: page.currentPage,
+          lastPage: page.lastPage,
+        },
+      }
+    }
+    return { items: await base }
   }
 
   /** Saldo atual = saldo posterior do último movimento registrado. */

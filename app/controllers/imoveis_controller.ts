@@ -13,6 +13,11 @@ export default class ImoveisController {
     return { imoveis }
   }
 
+  async show({ auth, params }: HttpContext) {
+    const imovel = await this.imovelService.find(auth.getUserOrFail(), params.id)
+    return { imovel }
+  }
+
   async store({ auth, request, response }: HttpContext) {
     const data = await request.validateUsing(createImovelValidator)
     const imovel = await this.imovelService.create(auth.getUserOrFail(), data)

@@ -10,6 +10,7 @@
 import router from '@adonisjs/core/services/router'
 
 import { middleware } from '#start/kernel'
+import { throttleAuth } from '#start/limiter'
 
 const RegisterController = () => import('#controllers/auth/register_controller')
 const LoginController = () => import('#controllers/auth/login_controller')
@@ -33,10 +34,10 @@ router.get('/', async () => {
 
 router
   .group(() => {
-    router.post('/register', [RegisterController])
-    router.post('/login', [LoginController])
-    router.post('/forgot-password', [ForgotPasswordController])
-    router.post('/reset-password', [ResetPasswordController])
+    router.post('/register', [RegisterController]).use(throttleAuth)
+    router.post('/login', [LoginController]).use(throttleAuth)
+    router.post('/forgot-password', [ForgotPasswordController]).use(throttleAuth)
+    router.post('/reset-password', [ResetPasswordController]).use(throttleAuth)
 
     router
       .group(() => {
@@ -52,7 +53,7 @@ router
 
 router
   .resource('imoveis', ImoveisController)
-  .only(['index', 'store', 'update', 'destroy'])
+  .only(['index', 'show', 'store', 'update', 'destroy'])
   .use('*', middleware.auth())
 
 router

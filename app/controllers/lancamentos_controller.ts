@@ -5,6 +5,14 @@ import { DateTime } from 'luxon'
 import LancamentoService from '#services/lancamento_service'
 import { type LancamentoData } from '#repositories/contracts/lancamento_repository'
 import { createLancamentoValidator, updateLancamentoValidator } from '#validators/lancamento'
+import type { PaginationOptions } from '#repositories/contracts/caixa_repository'
+
+/** page/limit presentes (limit ≤ 200) ativam paginação na listagem. */
+function paginacao(request: HttpContext['request']): PaginationOptions | undefined {
+  const page = Number(request.input('page'))
+  const limit = Number(request.input('limit'))
+  return page > 0 && limit > 0 ? { page, limit: Math.min(limit, 200) } : undefined
+}
 
 function toInput(data: {
   descricao: string
@@ -20,9 +28,8 @@ function toInput(data: {
 export default class LancamentosController {
   constructor(protected lancamentoService: LancamentoService) {}
 
-  async index({ auth }: HttpContext) {
-    const lancamentos = await this.lancamentoService.list(auth.getUserOrFail())
-    return { lancamentos }
+  async index({ auth, request }: HttpContext) {
+    return this.lancamentoService.list(auth.getUserOrFail(), paginacao(request))
   }
 
   async store({ auth, request, response }: HttpContext) {

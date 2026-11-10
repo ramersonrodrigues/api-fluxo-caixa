@@ -20,8 +20,30 @@ export interface CaixaMovimentoInput {
   dataMovimento: DateTime
 }
 
+export interface PaginationOptions {
+  page: number
+  limit: number
+}
+
+export interface PaginationMeta {
+  total: number
+  perPage: number
+  currentPage: number
+  lastPage: number
+}
+
+export interface PageResult<T> {
+  items: T[]
+  meta?: PaginationMeta
+}
+
 export default abstract class CaixaRepository {
-  abstract listForUser(userId: number, inicio?: DateTime, fim?: DateTime): Promise<CaixaMovimento[]>
+  abstract listForUser(
+    userId: number,
+    inicio?: DateTime,
+    fim?: DateTime,
+    paginacao?: PaginationOptions
+  ): Promise<PageResult<CaixaMovimento>>
   abstract saldoForUser(userId: number): Promise<number>
   /** Resultado do período: entradas menos saídas entre início e fim. */
   abstract resultadoPeriodo(userId: number, inicio: DateTime, fim: DateTime): Promise<number>

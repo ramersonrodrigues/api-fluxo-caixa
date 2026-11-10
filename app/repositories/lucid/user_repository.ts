@@ -48,7 +48,9 @@ export default class LucidUserRepository extends UserRepository {
   }
 
   createAccessToken(user: User): Promise<AccessToken> {
-    return User.accessTokens.create(user)
+    // Token com expiração finita: vazado, deixa de valer em até 30 dias
+    // em vez de permanecer válido para sempre.
+    return User.accessTokens.create(user, ['*'], { expiresIn: '30 days' })
   }
 
   async revokeAccessToken(user: User, identifier: string | number | BigInt): Promise<void> {

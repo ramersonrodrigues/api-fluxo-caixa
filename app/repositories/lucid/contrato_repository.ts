@@ -25,7 +25,7 @@ export default class LucidContratoRepository extends ContratoRepository {
     return db.transaction(async (trx) => {
       const contrato = new Contrato()
       contrato.useTransaction(trx)
-      await contrato.fill({ ...data, userId }).save()
+      await contrato.fill({ ...data, userId, status: 'ativo' }).save()
       await this.criarLancamento(trx, contrato, lancamento, parcelas)
       await contrato.load('imovel')
       return contrato
@@ -85,7 +85,9 @@ export default class LucidContratoRepository extends ContratoRepository {
   ): Promise<void> {
     const lancamento = new Lancamento()
     lancamento.useTransaction(trx)
-    await lancamento.fill({ ...data, userId: contrato.userId, contratoId: contrato.id }).save()
+    await lancamento
+      .fill({ ...data, userId: contrato.userId, contratoId: contrato.id, status: 'ativo' })
+      .save()
     await lancamento.related('parcelas').createMany(parcelas)
   }
 }

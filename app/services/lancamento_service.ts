@@ -9,6 +9,7 @@ import LancamentoRepository, {
   type LancamentoData,
   type ParcelaData,
 } from '#repositories/contracts/lancamento_repository'
+import type { PaginationOptions } from '#repositories/contracts/caixa_repository'
 
 /**
  * Parcelas mensais de mesmo valor a partir da data de início. Luxon
@@ -27,8 +28,9 @@ function gerarParcelas(data: LancamentoData): ParcelaData[] {
 export default class LancamentoService {
   constructor(protected lancamentos: LancamentoRepository) {}
 
-  list(user: User) {
-    return this.lancamentos.listForUser(user.id)
+  async list(user: User, paginacao?: PaginationOptions) {
+    const { items, meta } = await this.lancamentos.listForUser(user.id, paginacao)
+    return { lancamentos: items, meta }
   }
 
   create(user: User, data: LancamentoData) {
@@ -111,6 +113,6 @@ export default class LancamentoService {
     if (parcela.status !== 'paga') {
       throw new InvalidParcelaStatusException('Esta parcela ainda não foi executada.')
     }
-    return this.lancamentos.estornarParcela(parcela)
+    return this.lancamentos.estornarParcela(parcela, lancamento.status === 'cancelado')
   }
 }

@@ -21,7 +21,7 @@ const bodyParserConfig = defineConfig({
    */
   json: {
     convertEmptyStringsToNull: true,
-    limit: '5mb',
+    limit: '25mb',
     types: [
       'application/json',
       'application/json-patch+json',

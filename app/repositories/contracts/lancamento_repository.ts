@@ -3,6 +3,7 @@ import type { DateTime } from 'luxon'
 import type Lancamento from '#models/lancamento'
 import type LancamentoParcela from '#models/lancamento_parcela'
 import type { CaixaMovimentoTipo } from '#models/caixa_movimento'
+import type { PageResult, PaginationOptions } from '#repositories/contracts/caixa_repository'
 
 export interface LancamentoData {
   descricao: string
@@ -30,7 +31,10 @@ export interface MovimentoData {
 }
 
 export default abstract class LancamentoRepository {
-  abstract listForUser(userId: number): Promise<Lancamento[]>
+  abstract listForUser(
+    userId: number,
+    paginacao?: PaginationOptions
+  ): Promise<PageResult<Lancamento>>
   abstract findForUser(userId: number, id: number): Promise<Lancamento>
   abstract create(
     userId: number,
@@ -50,5 +54,13 @@ export default abstract class LancamentoRepository {
     parcela: LancamentoParcela,
     movimento: MovimentoData
   ): Promise<LancamentoParcela>
-  abstract estornarParcela(parcela: LancamentoParcela): Promise<LancamentoParcela>
+  /**
+   * Estorna a baixa (contra-movimento no caixa). `lancamentoCancelado`
+   * decide o destino: lançamento ativo volta a parcela a 'pendente'
+   * (pode executar de novo); cancelado vai para 'cancelada'.
+   */
+  abstract estornarParcela(
+    parcela: LancamentoParcela,
+    lancamentoCancelado: boolean
+  ): Promise<LancamentoParcela>
 }
