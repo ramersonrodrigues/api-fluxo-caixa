@@ -1,0 +1,15 @@
+node_modules
+build
+tmp
+.git
+.env
+.env.local
+.env.production.local
+.env.development.local
+.env.test
+*.log
+npm-debug.log
+yarn-error.log
+.dockerignore
+Dockerfile
+compose.yaml
