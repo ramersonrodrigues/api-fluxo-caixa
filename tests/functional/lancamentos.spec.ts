@@ -32,7 +32,7 @@ async function criarLancamento(client: any, bearer: Record<string, string>, body
 }
 
 test.group('Lançamentos — ciclo de vida', (group) => {
-  group.each.setup(() => testUtils.db().truncate())
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
 
   test('cria lançamento com parcelas pendentes', async ({ client, assert }) => {
     const bearer = await authClient(client)

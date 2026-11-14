@@ -1,0 +1,50 @@
+# Stack de producao para o servidor: puxa a imagem do GHCR (build vem do CI).
+# No servidor: copie este arquivo + crie .env com APP_KEY, DB_PASSWORD, DB_DATABASE.
+name: appfc
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env do servidor}
+      MYSQL_DATABASE: ${DB_DATABASE:-db_fc}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    image: ghcr.io/ramersonrodrigues/api-fluxo-caixa:latest
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      TZ: UTC
+      NODE_ENV: production
+      PORT: 3333
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      APP_KEY: ${APP_KEY:?defina APP_KEY no .env do servidor}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env do servidor}
+      DB_DATABASE: ${DB_DATABASE:-db_fc}
+      LIMITER_STORE: database
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-*}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3333/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  db_data:

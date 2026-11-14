@@ -18,7 +18,7 @@ async function registerAndLogin(client: { post: (url: string) => any }) {
 }
 
 test.group('Auth', (group) => {
-  group.each.setup(() => testUtils.db().truncate())
+  group.each.setup(() => testUtils.db().withGlobalTransaction())
 
   test('registro retorna usuário + token bearer', async ({ client, assert }) => {
     const response = await client.post('/auth/register').json(REGISTER_BODY)
